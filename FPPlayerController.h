@@ -8,8 +8,8 @@
 #include "FPPlayerController.generated.h"
 
 /**
- * 
- */
+*
+*/
 UCLASS()
 class ENVIRONMENTS_API AFPPlayerController : public APlayerController
 {

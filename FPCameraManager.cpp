@@ -17,16 +17,32 @@ AFPCameraManager::AFPCameraManager(const FObjectInitializer& ObjectInitializer) 
 
 void AFPCameraManager::UpdateCamera(float DeltaTime)
 {
-	AFPCharacter* MyPawn = Cast<AFPCharacter>(GetParentActor());
+	AFPCharacter* MyPawn = Cast<AFPCharacter>(GetOwningPlayerController()->GetPawn());
 
 	if (MyPawn)
 	{
-		const float TargetFOV = MyPawn->bIsZoomed ? TargetingFOV : NormalFOV;
+		float TargetFOV;
+		if (MyPawn->bIsZoomed)
+		{
+			TargetFOV = TargetingFOV;
+		}
+		else
+		{
+			TargetFOV = NormalFOV;
+		}
+
 		DefaultFOV = FMath::FInterpTo(DefaultFOV, TargetFOV, DeltaTime, 20.0f);
 
-		
+
+		SetFOV(DefaultFOV);
+
+		GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Red, FString::SanitizeFloat(DefaultFOV));
+	
+	
 	}
-	GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Red, "HAI");
+
+	
+
 	Super::UpdateCamera(DeltaTime);
 
 

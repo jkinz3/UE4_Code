@@ -3,8 +3,9 @@
 #include "FPPlayerController.h"
 AFPPlayerController::AFPPlayerController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	
+
 	PlayerCameraManagerClass = AFPCameraManager::StaticClass();
-	
+
 
 }
+
