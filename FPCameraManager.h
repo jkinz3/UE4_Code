@@ -14,8 +14,7 @@ class ENVIRONMENTS_API AFPCameraManager : public APlayerCameraManager
 {
 	GENERATED_BODY()
 
-		AFPCameraManager(const FObjectInitializer& ObjectInitializer);
-
+	AFPCameraManager(const FObjectInitializer& ObjectInitializer);
 
 	/** normal FOV */
 	float NormalFOV;
@@ -28,7 +27,4 @@ class ENVIRONMENTS_API AFPCameraManager : public APlayerCameraManager
 
 	/** After updating camera, inform pawn to update 1p mesh to match camera's location&rotation */
 	virtual void UpdateCamera(float DeltaTime) override;
-
-
-
 };

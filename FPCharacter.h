@@ -99,12 +99,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		float RightLean;
 
-
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		float LeanSpeed;
-
-
 
 	uint32 bIsMovingRight : 1;
 
@@ -114,16 +110,10 @@ protected:
 
 	float DefaultLean;
 
-
 	void UpdateCameraLean(float DeltaTime);
 
-		
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		USoundWave* FlashlightSwitchSound;
-
-	
-
-
 
 private:
 
@@ -133,9 +123,5 @@ private:
 
 	float LastStepTime;
 
-	uint32 bCanStep : 1;
-
-
 	float NextStepTime;
-
 };

@@ -15,6 +15,5 @@ class ENVIRONMENTS_API AFPPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-
-		AFPPlayerController(const FObjectInitializer& ObjectInitializer);
+	AFPPlayerController(const FObjectInitializer& ObjectInitializer);
 };

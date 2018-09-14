@@ -8,10 +8,15 @@
 AFPCameraManager::AFPCameraManager(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	SprintFOV = 95.f;
+	
 	NormalFOV = 90.f;
+	
 	TargetingFOV = 60.0f;
+	
 	ViewPitchMin = -87.f;
+	
 	ViewPitchMax = 87.0f;
+	
 	bAlwaysApplyModifiers = true;
 
 }
@@ -40,17 +45,8 @@ void AFPCameraManager::UpdateCamera(float DeltaTime)
 
 		DefaultFOV = FMath::FInterpTo(DefaultFOV, TargetFOV, DeltaTime, MyPawn->ZoomSpeed);
 
-
 		SetFOV(DefaultFOV);
-
-	
-	
-	
 	}
-
 	
-
 	Super::UpdateCamera(DeltaTime);
-
-
 }

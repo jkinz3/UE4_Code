@@ -10,14 +10,19 @@ AFPCharacter::AFPCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
+
 	PlayerCamera->SetupAttachment(RootComponent);
 
 	PlayerCamera->RelativeLocation = FVector(-39.f, 0.f, 64.f);
+
 	PlayerCamera->bUsePawnControlRotation = true;
 
 	Flashlight = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
+
 	Flashlight->SetupAttachment(PlayerCamera);
+
 	Flashlight->RelativeLocation = FVector(0.f, 0.f,4.f);
+
 	Flashlight->SetVisibility(false);
 
 	RunSpeed = 300.f;
@@ -38,25 +43,19 @@ AFPCharacter::AFPCharacter()
 
 	bIsZoomed = false;
 
-	bCanStep = true;
-
 	RightLean = 90.f;
+	
 	LeftLean = -90.f;
 
 	LeanSpeed = 20.f;
 
 	ZoomSpeed = 20.f;
-
-
 }
 
 // Called when the game starts or when spawned
 void AFPCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-
-
 }
 
 // Called every frame
@@ -64,10 +63,7 @@ void AFPCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
 	UpdateCameraLean(DeltaTime);
-
-
 }
 
 
@@ -81,52 +77,60 @@ void AFPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPCharacter::MoveRight);
 
 	PlayerInputComponent->BindAxis("Turn", this, &AFPCharacter::AddControllerYawInput);
+	
 	PlayerInputComponent->BindAxis("LookUp", this, &AFPCharacter::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("Flashlight", IE_Pressed, this, &AFPCharacter::ToggleFlashlight);
+	
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AFPCharacter::StartSprint);
+	
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AFPCharacter::StopSprint);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPCharacter::StartJump);
+	
 	PlayerInputComponent->BindAction("Quit", IE_Pressed, this, &AFPCharacter::OnQuit);
 
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &AFPCharacter::StartZoom);
+	
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &AFPCharacter::StopZoom);
-
 }
 
 void AFPCharacter::MoveForward(float Scale)
 {
 	if (Scale == 0)
 	{
-
 		return;
 	}
 	AddMovementInput(GetActorForwardVector(), Scale);
+	
 	HandleFootsteps();
 }
 
 void AFPCharacter::MoveRight(float Scale)
 {
-
 	if (Scale == 0)
 	{
-
 		bIsMovingLeft = false;
+
 		bIsMovingRight = false;
+
 		return;
 	}
+	
 	AddMovementInput(GetActorRightVector(), Scale);
+	
 	HandleFootsteps();
 
 	if (Scale == 1)
 	{
 		bIsMovingRight = true;
+		
 		bIsMovingLeft = false;
 	}
 	if (Scale == -1)
 	{
 		bIsMovingLeft = true;
+		
 		bIsMovingRight = false;
 	}
 }
@@ -136,32 +140,33 @@ void AFPCharacter::StartJump()
 	if (GetCharacterMovement()->IsMovingOnGround())
 	{
 		Jump();
+		
 		FHitResult DownHit = HandleFootstepTrace();
+		
 		PlayFootstepSound(DownHit);
-
 	}
-
 }
 
 void AFPCharacter::Landed(const FHitResult & Hit)
 {
-
-
 	PlayFootstepSound(Hit);
 }
 
 void AFPCharacter::StartSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	
 	TimeBetweenSteps = SprintStepRate;
+	
 	bIsSprinting = true;
-
 }
 
 void AFPCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	
 	TimeBetweenSteps = RunStepRate;
+	
 	bIsSprinting = false;
 }
 
@@ -170,13 +175,17 @@ void AFPCharacter::ToggleFlashlight()
 	if (bIsFlashlightOn)
 	{
 		Flashlight->SetVisibility(false);
+		
 		bIsFlashlightOn = false;
+		
 		UGameplayStatics::SpawnSoundAttached(FlashlightSwitchSound, GetRootComponent());
 	}
 	else
 	{
 		Flashlight->SetVisibility(true);
+	
 		bIsFlashlightOn = true;
+	
 		UGameplayStatics::SpawnSoundAttached(FlashlightSwitchSound, GetRootComponent());
 	}
 }
@@ -188,20 +197,17 @@ void AFPCharacter::OnQuit()
 
 void AFPCharacter::HandleFootsteps()
 {
-	
-	
 	if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) >= NextStepTime && GetCharacterMovement()->IsMovingOnGround())
 	{
-
-
 		FHitResult FootstepHitResult = HandleFootstepTrace();
 	
 		PlayFootstepSound(FootstepHitResult);
 
 		float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
-		LastStepTime = CurrentTime;
-		NextStepTime = CurrentTime + TimeBetweenSteps;
 
+		LastStepTime = CurrentTime;
+
+		NextStepTime = CurrentTime + TimeBetweenSteps;
 	}
 }
 
@@ -218,6 +224,7 @@ void AFPCharacter::StopZoom()
 USoundBase* AFPCharacter::GetFootstepSound(EPhysicalSurface Surface)
 {
 	USoundBase** SoundPtr = nullptr;
+	
 	SoundPtr = FootstepSoundsMap.Find(Surface);
 
 	return SoundPtr ? *SoundPtr : nullptr;
@@ -225,17 +232,12 @@ USoundBase* AFPCharacter::GetFootstepSound(EPhysicalSurface Surface)
 
 void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit)
 {
-	
-
-
 	if (DownHit.PhysMaterial != NULL)
 	{
 		EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(DownHit.PhysMaterial.Get());
 
-
-		
-
 		USoundBase* NewFootstepSound = GetFootstepSound(SurfaceType);
+
 		if (NewFootstepSound)
 		{
 			UGameplayStatics::SpawnSoundAtLocation(this, NewFootstepSound, DownHit.Location);
@@ -244,24 +246,19 @@ void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit)
 		{
 			UGameplayStatics::SpawnSoundAtLocation(this, DefaultStepSound, DownHit.Location);
 		}
-	
-
-		
-
 	}
-
-
 }
 
 FHitResult AFPCharacter::HandleFootstepTrace()
 {
-
 	static FName NAME_FootstepTrace(TEXT("FootstepTrace"));
+
 	FCollisionQueryParams QueryParams(NAME_FootstepTrace, false, this);
 
 	QueryParams.bReturnPhysicalMaterial = true;
 
 	float PawnRadius;
+
 	float PawnHalfHeight;
 
 	GetCapsuleComponent()->GetScaledCapsuleSize(PawnRadius, PawnHalfHeight);
@@ -275,19 +272,14 @@ FHitResult AFPCharacter::HandleFootstepTrace()
 	FHitResult RV_DownHit;
 
 	GetWorld()->LineTraceSingleByChannel(RV_DownHit, LineTraceStart, LineTraceStart + DownDirection, GetCapsuleComponent()->GetCollisionObjectType(), QueryParams);
-
 	
 	return RV_DownHit;
 }
 
 void AFPCharacter::UpdateCameraLean(float DeltaTime)
 {
-	
-
-
 	if (PlayerCamera)
 	{
-	
 		if (!bIsMovingLeft && !bIsMovingRight)
 		{
 			TargetLean = 0.0f;
@@ -301,15 +293,9 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 			TargetLean = LeftLean;
 		}
 		
-
 		DefaultLean = FMath::FInterpTo(DefaultLean, TargetLean, DeltaTime, LeanSpeed);
-		PlayerCamera->RelativeRotation.Roll = DefaultLean;
-
-	
 		
-
+		PlayerCamera->RelativeRotation.Roll = DefaultLean;
 	}
-
-
 }
 
