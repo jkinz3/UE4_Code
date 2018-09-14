@@ -32,12 +32,20 @@ AFPCharacter::AFPCharacter()
 
 	SprintStepRate = .3f;
 
+	DefaultLean = 0.f;
 	
 	TimeBetweenSteps = RunStepRate;
 
 	bIsZoomed = false;
 
 	bCanStep = true;
+
+	RightLean = 90.f;
+	LeftLean = -90.f;
+
+	LeanSpeed = 20.f;
+
+	ZoomSpeed = 20.f;
 
 
 }
@@ -56,7 +64,8 @@ void AFPCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
+	
+	UpdateCameraLean(DeltaTime);
 
 
 }
@@ -102,10 +111,24 @@ void AFPCharacter::MoveRight(float Scale)
 
 	if (Scale == 0)
 	{
+
+		bIsMovingLeft = false;
+		bIsMovingRight = false;
 		return;
 	}
 	AddMovementInput(GetActorRightVector(), Scale);
 	HandleFootsteps();
+
+	if (Scale == 1)
+	{
+		bIsMovingRight = true;
+		bIsMovingLeft = false;
+	}
+	if (Scale == -1)
+	{
+		bIsMovingLeft = true;
+		bIsMovingRight = false;
+	}
 }
 
 void AFPCharacter::StartJump()
@@ -131,12 +154,15 @@ void AFPCharacter::StartSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	TimeBetweenSteps = SprintStepRate;
+	bIsSprinting = true;
+
 }
 
 void AFPCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	TimeBetweenSteps = RunStepRate;
+	bIsSprinting = false;
 }
 
 void AFPCharacter::ToggleFlashlight()
@@ -199,7 +225,7 @@ USoundBase* AFPCharacter::GetFootstepSound(EPhysicalSurface Surface)
 
 void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit)
 {
-	GEngine->AddOnScreenDebugMessage(1, .5f, FColor::Red, DownHit.PhysMaterial.Get()->GetFullName());
+	
 
 
 	if (DownHit.PhysMaterial != NULL)
@@ -252,5 +278,38 @@ FHitResult AFPCharacter::HandleFootstepTrace()
 
 	
 	return RV_DownHit;
+}
+
+void AFPCharacter::UpdateCameraLean(float DeltaTime)
+{
+	
+
+
+	if (PlayerCamera)
+	{
+	
+		if (!bIsMovingLeft && !bIsMovingRight)
+		{
+			TargetLean = 0.0f;
+		}
+		if (bIsMovingRight)
+		{
+			TargetLean = RightLean;
+		}
+		if (bIsMovingLeft)
+		{
+			TargetLean = LeftLean;
+		}
+		
+
+		DefaultLean = FMath::FInterpTo(DefaultLean, TargetLean, DeltaTime, LeanSpeed);
+		PlayerCamera->RelativeRotation.Roll = DefaultLean;
+
+	
+		
+
+	}
+
+
 }
 

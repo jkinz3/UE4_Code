@@ -23,6 +23,9 @@ class ENVIRONMENTS_API AFPCameraManager : public APlayerCameraManager
 	/** targeting FOV */
 	float TargetingFOV;
 
+	/*sprinting FOV*/
+	float SprintFOV;
+
 	/** After updating camera, inform pawn to update 1p mesh to match camera's location&rotation */
 	virtual void UpdateCamera(float DeltaTime) override;
 

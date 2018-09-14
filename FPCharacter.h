@@ -62,6 +62,11 @@ public:
 
 	uint32 bIsZoomed : 1;
 
+	uint32 bIsSprinting : 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
+		float ZoomSpeed;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
@@ -88,7 +93,29 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		USoundBase* DefaultStepSound;
 
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
+		float LeftLean;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
+		float RightLean;
+
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
+		float LeanSpeed;
+
+
+
+	uint32 bIsMovingRight : 1;
+
+	uint32 bIsMovingLeft : 1;
+
+	float TargetLean;
+
+	float DefaultLean;
+
+
+	void UpdateCameraLean(float DeltaTime);
 
 		
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
