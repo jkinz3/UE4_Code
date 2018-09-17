@@ -27,7 +27,7 @@ void AFPCameraManager::UpdateCamera(float DeltaTime)
 
 	if (MyPawn)
 	{
-		float TargetFOV;
+		float TargetFOV = 90.f;
 		if (MyPawn->bIsZoomed && !MyPawn->bIsSprinting)
 		{
 			TargetFOV = TargetingFOV;
@@ -41,12 +41,11 @@ void AFPCameraManager::UpdateCamera(float DeltaTime)
 			TargetFOV = SprintFOV;
 		}
 
-		GEngine->AddOnScreenDebugMessage(-1, .5f, FColor::White, FString::SanitizeFloat(TargetFOV));
-
 		DefaultFOV = FMath::FInterpTo(DefaultFOV, TargetFOV, DeltaTime, MyPawn->ZoomSpeed);
 
 		SetFOV(DefaultFOV);
 	}
-	
+
+	GEngine->AddOnScreenDebugMessage(1, .5f, FColor::White, FString::SanitizeFloat(DefaultFOV));
 	Super::UpdateCamera(DeltaTime);
 }

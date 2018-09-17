@@ -286,7 +286,7 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 		}
 		if (bIsMovingRight)
 		{
-			TargetLean = RightLean;
+		 	TargetLean = RightLean; 
 		}
 		if (bIsMovingLeft)
 		{
@@ -294,7 +294,7 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 		}
 		
 		DefaultLean = FMath::FInterpTo(DefaultLean, TargetLean, DeltaTime, LeanSpeed);
-		
+				
 		PlayerCamera->RelativeRotation.Roll = DefaultLean;
 	}
 }
