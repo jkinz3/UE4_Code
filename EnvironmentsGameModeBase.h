@@ -13,4 +13,8 @@ UCLASS()
 class ENVIRONMENTS_API AEnvironmentsGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+	
+	
+	
+	
 };
