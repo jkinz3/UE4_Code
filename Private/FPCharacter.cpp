@@ -15,8 +15,6 @@ AFPCharacter::AFPCharacter()
 
 	PlayerCamera->RelativeLocation = FVector(-39.f, 0.f, 64.f);
 
-	PlayerCamera->bUsePawnControlRotation = true;
-
 	Flashlight = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
 
 	Flashlight->SetupAttachment(PlayerCamera);
