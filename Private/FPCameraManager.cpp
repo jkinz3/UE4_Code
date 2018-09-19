@@ -45,7 +45,5 @@ void AFPCameraManager::UpdateCamera(float DeltaTime)
 
 		SetFOV(DefaultFOV);
 	}
-
-	GEngine->AddOnScreenDebugMessage(1, .5f, FColor::White, FString::SanitizeFloat(DefaultFOV));
 	Super::UpdateCamera(DeltaTime);
 }

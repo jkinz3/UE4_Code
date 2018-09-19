@@ -93,11 +93,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		USoundBase* DefaultStepSound;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
-		float LeftLean;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
-		float RightLean;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta=(ClampMin=".001"))
+		float LeanAmount;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		float LeanSpeed;

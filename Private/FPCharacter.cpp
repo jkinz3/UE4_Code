@@ -41,9 +41,7 @@ AFPCharacter::AFPCharacter()
 
 	bIsZoomed = false;
 
-	RightLean = 90.f;
-	
-	LeftLean = -90.f;
+	LeanAmount = .001f;
 
 	LeanSpeed = 20.f;
 
@@ -284,13 +282,15 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 		}
 		if (bIsMovingRight)
 		{
-		 	TargetLean = RightLean; 
+			TargetLean = LeanAmount;
 		}
 		if (bIsMovingLeft)
 		{
-			TargetLean = LeftLean;
+			float LeftLeanAmount = LeanAmount * -1.f;
+	
+
+			TargetLean = LeftLeanAmount;
 		}
-		
 		DefaultLean = FMath::FInterpTo(DefaultLean, TargetLean, DeltaTime, LeanSpeed);
 				
 		PlayerCamera->RelativeRotation.Roll = DefaultLean;
