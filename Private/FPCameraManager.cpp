@@ -2,7 +2,6 @@
 
 #include "FPCameraManager.h"
 #include "FPCharacter.h"
-#include "Engine.h"
 
 
 AFPCameraManager::AFPCameraManager(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
