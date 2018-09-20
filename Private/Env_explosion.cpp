@@ -16,10 +16,6 @@ AEnv_explosion::AEnv_explosion()
 	NextExplodeTime = 0.0f;
 
 	Duration = .5f;
-
-	ExplosionParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Explosion Particle"));
-	
-	ExplosionParticle->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -40,11 +36,13 @@ void AEnv_explosion::Explode()
 {
 	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
-	if (CurrentTime >= NextExplodeTime)
+	if (CurrentTime >= NextExplodeTime && ExplosionParticle && ExplosionSound)
 	{
-		ExplosionParticle->Activate();
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle,  GetActorLocation());
 
 		NextExplodeTime = CurrentTime + Duration;
+
+		UGameplayStatics::SpawnSoundAtLocation(this, ExplosionSound, GetActorLocation());
 	}
 }
 

@@ -33,11 +33,14 @@ public:
 		USoundBase* ExplosionSound;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Explosion)
-		UParticleSystemComponent* ExplosionParticle;
+		UParticleSystem* ExplosionParticle;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Explosion)
+	float Duration;
 
 private:
 
-	float Duration;
+
 	
 	float NextExplodeTime;
 
