@@ -38,6 +38,10 @@ public:
 
 	void StartJump();
 
+	void Turn(float Scale);
+
+	void LookUp(float Scale);
+
 	virtual void Landed(const FHitResult& Hit);
 
 	void StartSprint();

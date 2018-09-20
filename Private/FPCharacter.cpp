@@ -72,9 +72,9 @@ void AFPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPCharacter::MoveRight);
 
-	PlayerInputComponent->BindAxis("Turn", this, &AFPCharacter::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("Turn", this, &AFPCharacter::Turn);
 	
-	PlayerInputComponent->BindAxis("LookUp", this, &AFPCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &AFPCharacter::LookUp);
 
 	PlayerInputComponent->BindAction("Flashlight", IE_Pressed, this, &AFPCharacter::ToggleFlashlight);
 	
@@ -141,6 +141,18 @@ void AFPCharacter::StartJump()
 		
 		PlayFootstepSound(DownHit);
 	}
+}
+
+void AFPCharacter::Turn(float Scale)
+{
+	AddControllerYawInput(Scale);
+}
+
+void AFPCharacter::LookUp(float Scale)
+{
+	AddControllerPitchInput(Scale);
+
+	PlayerCamera->RelativeRotation.Pitch = GetController()->GetControlRotation().Pitch;
 }
 
 void AFPCharacter::Landed(const FHitResult & Hit)
@@ -287,7 +299,6 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 		if (bIsMovingLeft)
 		{
 			float LeftLeanAmount = LeanAmount * -1.f;
-	
 
 			TargetLean = LeftLeanAmount;
 		}
