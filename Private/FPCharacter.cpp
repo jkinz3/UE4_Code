@@ -89,6 +89,8 @@ void AFPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &AFPCharacter::StartZoom);
 	
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &AFPCharacter::StopZoom);
+
+	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &AFPCharacter::OnUse);
 }
 
 void AFPCharacter::MoveForward(float Scale)
@@ -255,6 +257,7 @@ void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit)
 			UGameplayStatics::SpawnSoundAtLocation(this, DefaultStepSound, DownHit.Location);
 		}
 	}
+
 }
 
 FHitResult AFPCharacter::HandleFootstepTrace()
@@ -308,3 +311,31 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 	}
 }
 
+void AFPCharacter::OnUse()
+{
+
+}
+
+FHitResult AFPCharacter::ForwardTrace()
+{
+	FHitResult RV_ForwardHit;
+
+	static FName NAME_ForwardTrace(TEXT("Forward Trace"));
+
+	FCollisionQueryParams QueryParams(NAME_ForwardTrace, false, this);
+
+	QueryParams.TraceTag = NAME_ForwardTrace;
+
+	const FVector TraceStart = PlayerCamera->GetComponentLocation();
+
+	const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 256;
+
+	GetWorld()->LineTraceSingleByChannel(RV_ForwardHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
+	
+	if (RV_ForwardHit.Actor != NULL)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Red, "HAI");
+	}
+
+	return RV_ForwardHit;
+}

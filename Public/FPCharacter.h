@@ -58,6 +58,12 @@ public:
 
 	void StopZoom();
 
+	void UpdateCameraLean(float DeltaTime);
+
+	void OnUse();
+
+	FHitResult ForwardTrace();
+
 	USoundBase* GetFootstepSound(EPhysicalSurface Surface);
 
 	void PlayFootstepSound(const FHitResult& DownHit);
@@ -103,20 +109,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		float LeanSpeed;
 
-	uint32 bIsMovingRight : 1;
-
-	uint32 bIsMovingLeft : 1;
-
-	float TargetLean;
-
-	float DefaultLean;
-
-	void UpdateCameraLean(float DeltaTime);
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		USoundWave* FlashlightSwitchSound;
 
 private:
+
+	uint32 bIsMovingRight : 1;
+
+	uint32 bIsMovingLeft : 1;
 
 	uint32 bIsFlashlightOn : 1;
 
@@ -125,4 +125,8 @@ private:
 	float LastStepTime;
 
 	float NextStepTime;
+
+	float TargetLean;
+
+	float DefaultLean;
 };
