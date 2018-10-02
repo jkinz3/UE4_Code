@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "FPCameraManager.h"
-#include "FPCharacter.h"
+#include "../Public/FPCameraManager.h"
+#include "../Public/FPCharacter.h"
+
 
 
 AFPCameraManager::AFPCameraManager(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)

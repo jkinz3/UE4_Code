@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "JumpPad.h"
-#include "FPCharacter.h"
+#include "../Public/JumpPad.h"
+#include "../Public/FPCharacter.h"
 #include "Runtime/Engine/Classes/Components/BoxComponent.h"
 #include "Runtime/Engine/Classes/Components/CapsuleComponent.h"
 #include "Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
