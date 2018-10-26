@@ -112,3 +112,7 @@ void ATPCharacter::StopJump()
 	StopJumping();
 }
 
+void ATPCharacter::OnQuit()
+{
+	FGenericPlatformMisc::RequestExit(true);
+}
