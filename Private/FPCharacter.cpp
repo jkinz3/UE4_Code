@@ -25,7 +25,13 @@ AFPCharacter::AFPCharacter()
 
 	RunSpeed = 300.f;
 
+	FlySprintSpeed = 1000.f;
+
+	FlySpeed = 600.f;
+
 	SprintSpeed = 600.f;
+
+	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
 
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 
@@ -71,6 +77,10 @@ void AFPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFPCharacter::MoveForward);
 
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFPCharacter::MoveRight);
+
+	PlayerInputComponent->BindAxis("MoveUp", this, &AFPCharacter::MoveUp);
+
+	PlayerInputComponent->BindAction("Fly", IE_Pressed, this, &AFPCharacter::OnFly);
 
 	PlayerInputComponent->BindAxis("Turn", this, &AFPCharacter::Turn);
 	
@@ -133,6 +143,14 @@ void AFPCharacter::MoveRight(float Scale)
 	}
 }
 
+void AFPCharacter::MoveUp(float Scale)
+{
+	if (GetCharacterMovement()->IsFlying())
+	{
+		AddMovementInput(GetActorUpVector(), Scale);
+	}
+}
+
 void AFPCharacter::StartJump()
 {
 	if (GetCharacterMovement()->IsMovingOnGround())
@@ -164,6 +182,7 @@ void AFPCharacter::Landed(const FHitResult & Hit)
 
 void AFPCharacter::StartSprint()
 {
+	GetCharacterMovement()->MaxFlySpeed = FlySprintSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	
 	TimeBetweenSteps = SprintStepRate;
@@ -173,6 +192,8 @@ void AFPCharacter::StartSprint()
 
 void AFPCharacter::StopSprint()
 {
+	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
+	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	
 	TimeBetweenSteps = RunStepRate;
@@ -314,6 +335,18 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 void AFPCharacter::OnUse()
 {
 
+}
+
+void AFPCharacter::OnFly()
+{
+	if (GetCharacterMovement()->IsFlying())
+	{
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	}
+	else
+	{
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+	}
 }
 
 FHitResult AFPCharacter::ForwardTrace()

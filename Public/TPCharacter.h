@@ -29,6 +29,14 @@ public:
 	void MoveForward(float Scale);
 
 	void MoveRight(float Scale);
+
+	void MoveUp(float Scale);
+
+	void StartFlySprint();
+
+	void StopFlySprint();
+
+	void OnFly();
 	
 	void LookUp(float Scale);
 
@@ -43,5 +51,17 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Camera)
 		class UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+		float FlySpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+		float FlySprintSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+		float ResetSpeed;
+
+	float DefaultPitch;  
+
 };
  

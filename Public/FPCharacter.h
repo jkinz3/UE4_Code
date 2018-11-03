@@ -36,6 +36,8 @@ public:
 
 	void MoveRight(float Scale);
 
+	void MoveUp(float Scale); 
+
 	void StartJump();
 
 	void Turn(float Scale);
@@ -62,6 +64,8 @@ public:
 
 	void OnUse();
 
+	void OnFly();
+
 	FHitResult ForwardTrace();
 
 	USoundBase* GetFootstepSound(EPhysicalSurface Surface);
@@ -84,6 +88,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		float SprintSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+		float FlySpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+		float FlySprintSpeed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		float RunStepRate;
