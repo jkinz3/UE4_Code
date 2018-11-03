@@ -45,6 +45,8 @@ public:
 	void OnJump();
 
 	void StopJump();
+	
+	void OnQuit();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Camera)
 		class USpringArmComponent* CameraBoom;
