@@ -52,6 +52,11 @@ AFPCharacter::AFPCharacter()
 	LeanSpeed = 20.f;
 
 	ZoomSpeed = 20.f;
+
+	HoldingComponent = CreateDefaultSubobject<USceneComponent>(TEXT("HoldingComponent"));
+	HoldingComponent->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
+
+	CurrentObject = NULL;
 }
 
 // Called when the game starts or when spawned
@@ -334,7 +339,23 @@ void AFPCharacter::UpdateCameraLean(float DeltaTime)
 
 void AFPCharacter::OnUse()
 {
+	FHitResult RV_ForwardHit;
+	static FName NAME_ForwardTrace(TEXT("Forward Trace"));
+	FCollisionQueryParams QueryParams(NAME_ForwardTrace, false, this);
 
+	QueryParams.TraceTag = NAME_ForwardTrace;
+
+	const FVector TraceStart = PlayerCamera->GetComponentLocation();
+
+	const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 256;
+
+	GetWorld()->LineTraceSingleByChannel(RV_ForwardHit, TraceStart, TraceEnd, GetCapsuleComponent()->GetCollisionObjectType(), QueryParams);
+
+	if (RV_ForwardHit.Actor != NULL && RV_ForwardHit.Actor->GetClass()->IsChildOf(AInteractionObject::StaticClass()))
+	{
+		AInteractionObject* HoldingObject = Cast < AInteractionObject> (RV_ForwardHit.GetActor());
+		HoldingObject->PickUp(this);
+	}
 }
 
 void AFPCharacter::OnFly()

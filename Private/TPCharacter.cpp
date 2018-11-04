@@ -48,25 +48,6 @@ void ATPCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float ActorPitch = GetActorRotation().Pitch;
-	float DefaultPitch = ActorPitch;
-	float ActorYaw = GetActorRotation().Yaw;
-	float ActorRoll = GetActorRotation().Roll;
-
-	GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::White, FString::SanitizeFloat(DefaultPitch));
-
-	if (!GetCharacterMovement()->IsFlying())
-	{
-
-		DefaultPitch = FMath::FInterpTo(DefaultPitch, 0.f, DeltaTime, ResetSpeed);
-		FRotator NewRotation = FRotator(DefaultPitch, ActorYaw, ActorRoll);
-	
-	
-	}
-	else
-	{
-		
-	}
 	
 	
 }

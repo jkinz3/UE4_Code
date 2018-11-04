@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Sound/SoundWave.h"
+#include "InteractionObject.h"
 #include "Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
 #include "Runtime/Engine/Classes/PhysicalMaterials/PhysicalMaterial.h"
 #include "Runtime/Engine/Classes/Components/SpotLightComponent.h"
@@ -66,6 +67,8 @@ public:
 
 	void OnFly();
 
+	FVector GetHoldingLocation() {return HoldingComponent->GetComponentLocation(); }
+
 	FHitResult ForwardTrace();
 
 	USoundBase* GetFootstepSound(EPhysicalSurface Surface);
@@ -80,6 +83,14 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		float ZoomSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		class AInteractionObject* CurrentObject;
+	
+	FVector HoldingLocation;
+
+	uint32 bHoldingObject;
+
 
 protected:
 
@@ -121,6 +132,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		USoundWave* FlashlightSwitchSound;
+
+	UPROPERTY(EditAnywhere)
+		class USceneComponent* HoldingComponent;
+
+
 
 private:
 
