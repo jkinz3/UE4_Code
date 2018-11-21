@@ -175,7 +175,7 @@ void AFPCharacter::LookUp(float Scale)
 	PlayerCamera->RelativeRotation.Pitch = GetController()->GetControlRotation().Pitch;
 }
 
-void AFPCharacter::Landed(const FHitResult & Hit)
+void AFPCharacter::OnLanded(const FHitResult & Hit)
 {
 	PlayFootstepSound(Hit);
 }

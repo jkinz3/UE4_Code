@@ -44,7 +44,7 @@ public:
 
 	void LookUp(float Scale);
 
-	virtual void Landed(const FHitResult& Hit);
+	virtual void OnLanded(const FHitResult& Hit);
 
 	void StartSprint();
 
