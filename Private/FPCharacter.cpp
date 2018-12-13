@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "../Public/FPCharacter.h"
+#include "FPCharacterMovementComponent.h"
 #include "Engine.h"
 
 // Sets default values
@@ -52,6 +53,8 @@ AFPCharacter::AFPCharacter()
 	LeanSpeed = 20.f;
 
 	ZoomSpeed = 20.f;
+
+	bUseLean = false;
 }
 
 // Called when the game starts or when spawned
@@ -65,7 +68,10 @@ void AFPCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateCameraLean(DeltaTime);
+	if (bUseLean == true)
+	{
+		UpdateCameraLean(DeltaTime);
+	}
 }
 
 

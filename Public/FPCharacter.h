@@ -113,14 +113,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		USoundBase* DefaultStepSound;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta=(ClampMin=".001"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta=(ClampMin=".001", EditCondition = "bUseLean"))
 		float LeanAmount;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta=(EditCondition = "bUseLean"))
 		float LeanSpeed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		USoundWave* FlashlightSwitchSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
+		uint32 bUseLean : 1;
 
 private:
 
