@@ -66,6 +66,11 @@ public:
 
 	void OnFly();
 
+	void OnDeath();
+
+	UFUNCTION(BlueprintCallable)
+	virtual float TakeDamage(float Damage);
+
 	FHitResult ForwardTrace();
 
 	USoundBase* GetFootstepSound(EPhysicalSurface Surface);
@@ -125,6 +130,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		uint32 bUseLean : 1;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
+		float MaxHealth;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
+		USoundBase* DamageSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
+		USoundBase* DeathSound;
+
 private:
 
 	uint32 bIsMovingRight : 1;
@@ -142,4 +156,6 @@ private:
 	float TargetLean;
 
 	float DefaultLean;
+
+	float CurrentHealth;
 };

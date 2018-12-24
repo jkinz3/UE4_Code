@@ -54,6 +54,8 @@ AFPCharacter::AFPCharacter()
 	ZoomSpeed = 20.f;
 
 	bUseLean = false;
+
+	CurrentHealth = MaxHealth;
 }
 
 // Called when the game starts or when spawned
@@ -354,6 +356,29 @@ void AFPCharacter::OnFly()
 	}
 }
 
+void AFPCharacter::OnDeath()
+{
+}
+float AFPCharacter::TakeDamage(float Damage)
+{
+	CurrentHealth -= Damage;
+
+	if (DamageSound != nullptr)
+	{
+		UGameplayStatics::SpawnSoundAttached(DamageSound, GetRootComponent());
+	}
+
+	if (CurrentHealth <= 0.0f)
+	{
+		if (DeathSound != nullptr)
+		{
+			UGameplayStatics::SpawnSoundAttached(DeathSound, GetRootComponent());
+		}
+		OnDeath();
+	}
+
+	return CurrentHealth;
+}
 FHitResult AFPCharacter::ForwardTrace()
 {
 	FHitResult RV_ForwardHit;
