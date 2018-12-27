@@ -166,7 +166,7 @@ void AFPCharacter::StartJump()
 		
 		FHitResult DownHit = HandleFootstepTrace();
 		
-		PlayFootstepSound(DownHit);
+		PlayFootstepSound(DownHit, true);
 	}
 }
 
@@ -182,9 +182,9 @@ void AFPCharacter::LookUp(float Scale)
 	PlayerCamera->RelativeRotation.Pitch = GetController()->GetControlRotation().Pitch;
 }
 
-void AFPCharacter::OnLanded(const FHitResult & Hit)
+void AFPCharacter::Landed(const FHitResult & Hit)
 {
-	PlayFootstepSound(Hit);
+	PlayFootstepSound(Hit, false);
 }
 
 void AFPCharacter::StartSprint()
@@ -200,7 +200,7 @@ void AFPCharacter::StartSprint()
 void AFPCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
-	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
+
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	
 	TimeBetweenSteps = RunStepRate;
@@ -239,7 +239,7 @@ void AFPCharacter::HandleFootsteps()
 	{
 		FHitResult FootstepHitResult = HandleFootstepTrace();
 	
-		PlayFootstepSound(FootstepHitResult);
+		PlayFootstepSound(FootstepHitResult, false);
 
 		float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
@@ -259,25 +259,40 @@ void AFPCharacter::StopZoom()
 	bIsZoomed = false;
 }
 
-USoundBase* AFPCharacter::GetFootstepSound(EPhysicalSurface Surface)
+USoundBase* AFPCharacter::GetFootstepSound(EPhysicalSurface Surface, bool bIsJumping)
 {
 	USoundBase** SoundPtr = nullptr;
-	
-	SoundPtr = FootstepSoundsMap.Find(Surface);
 
+	if (IsSprinting())
+	{
+		SoundPtr = SprintStepsMap.Find(Surface);
+	}
+	else if(!IsSprinting())
+	{
+		SoundPtr = WalkStepsMap.Find(Surface);
+	}
+	if (bIsJumping)
+	{
+		SoundPtr = SprintStepsMap.Find(Surface);
+	}
+	if (!bIsJumping && GetCharacterMovement()->IsFalling())
+	{
+		SoundPtr = LandStepsMap.Find(Surface);
+	}
 	return SoundPtr ? *SoundPtr : nullptr;
 }
 
-void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit)
+void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit, bool bIsJumping)
 {
 	if (DownHit.PhysMaterial != NULL)
 	{
 		EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(DownHit.PhysMaterial.Get());
 
-		USoundBase* NewFootstepSound = GetFootstepSound(SurfaceType);
+		USoundBase* NewFootstepSound = GetFootstepSound(SurfaceType, bIsJumping);
 
 		if (NewFootstepSound)
 		{
+			GEngine->AddOnScreenDebugMessage(1, .5f, FColor::Blue, NewFootstepSound->GetFullName());
 			UGameplayStatics::SpawnSoundAtLocation(this, NewFootstepSound, DownHit.Location);
 		}
 		else
@@ -358,6 +373,10 @@ void AFPCharacter::OnFly()
 
 void AFPCharacter::OnDeath()
 {
+}
+bool AFPCharacter::IsSprinting()
+{
+	return bIsSprinting;
 }
 float AFPCharacter::TakeDamage(float Damage)
 {
