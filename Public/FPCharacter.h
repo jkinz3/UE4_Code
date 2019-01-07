@@ -44,7 +44,7 @@ public:
 
 	void LookUp(float Scale);
 
-	virtual void OnLanded(const FHitResult& Hit);
+	virtual void Landed(const FHitResult& Hit);
 
 	void StartSprint();
 
@@ -68,18 +68,23 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		bool bIsMovingForward();
+	void OnDeath();
+	
+	UFUNCTION(BlueprintCallable)
+		bool IsSprinting();
+
+	UFUNCTION(BlueprintCallable)
+	virtual float TakeDamage(float Damage);
 
 	FHitResult ForwardTrace();
 
-	USoundBase* GetFootstepSound(EPhysicalSurface Surface);
+	USoundBase* GetFootstepSound(EPhysicalSurface Surface, bool bIsJumping);
 
-	void PlayFootstepSound(const FHitResult& DownHit);
+	void PlayFootstepSound(const FHitResult& DownHit, bool bIsJumping);
 
 	FHitResult HandleFootstepTrace();
 
 	uint32 bIsZoomed : 1;
-
-	uint32 bIsSprinting : 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		float ZoomSpeed;
@@ -105,7 +110,13 @@ protected:
 		float SprintStepRate;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
-		TMap < TEnumAsByte<EPhysicalSurface>, USoundBase*> FootstepSoundsMap;
+		TMap < TEnumAsByte<EPhysicalSurface>, USoundBase*> WalkStepsMap;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
+		TMap < TEnumAsByte<EPhysicalSurface>, USoundBase*> SprintStepsMap;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
+		TMap <TEnumAsByte<EPhysicalSurface>, USoundBase*> LandStepsMap;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		UCameraComponent* PlayerCamera;
@@ -131,6 +142,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
 		uint32 bUseLean : 1;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
+		float MaxHealth;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
+		USoundBase* DamageSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
+		USoundBase* DeathSound;
+
 private:
 
 	uint32 bIsMovingRight : 1;
@@ -148,4 +168,8 @@ private:
 	float TargetLean;
 
 	float DefaultLean;
+
+	float CurrentHealth;
+
+	bool bIsSprinting : 1;
 };
