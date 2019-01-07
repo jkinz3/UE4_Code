@@ -23,10 +23,18 @@ AFPCharacter::AFPCharacter()
 
 	Flashlight->SetVisibility(false);
 
+	WorldMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("3rd Person Mesh"));
+
+	WorldMesh->SetupAttachment(RootComponent);
+
+	WorldMesh->RelativeLocation = FVector(0.f, 0.f, -90.f);
+
+	WorldMesh->RelativeRotation = FRotator(0.f, 0.f, -90.f);
+
 	RunSpeed = 300.f;
 
 	FlySprintSpeed = 1000.f;
-
+	
 	FlySpeed = 600.f;
 
 	SprintSpeed = 600.f;
@@ -70,6 +78,10 @@ void AFPCharacter::Tick(float DeltaTime)
 	if (bUseLean == true)
 	{
 		UpdateCameraLean(DeltaTime);
+	}
+	if (!bIsMovingForward() && bIsSprinting)
+	{
+		StopSprint();
 	}
 }
 
@@ -187,12 +199,15 @@ void AFPCharacter::OnLanded(const FHitResult & Hit)
 
 void AFPCharacter::StartSprint()
 {
-	GetCharacterMovement()->MaxFlySpeed = FlySprintSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-	
-	TimeBetweenSteps = SprintStepRate;
-	
-	bIsSprinting = true;
+	if (bIsMovingForward())
+	{
+		GetCharacterMovement()->MaxFlySpeed = FlySprintSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+
+		TimeBetweenSteps = SprintStepRate;
+
+		bIsSprinting = true;
+	}
 }
 
 void AFPCharacter::StopSprint()
@@ -352,6 +367,18 @@ void AFPCharacter::OnFly()
 	{
 		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 	}
+}
+
+bool AFPCharacter::bIsMovingForward()
+{
+	FVector PlayerVelocity = GetVelocity();
+	FVector ForwardVector = GetActorForwardVector();
+	float DotProduct = FVector::DotProduct(PlayerVelocity, ForwardVector);
+	if (DotProduct > .7f)
+	{
+		return true;
+	}
+	return false;
 }
 
 FHitResult AFPCharacter::ForwardTrace()
