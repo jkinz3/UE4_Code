@@ -23,6 +23,10 @@ AFPCharacter::AFPCharacter()
 
 	Flashlight->SetVisibility(false);
 
+	// Set our turn rates for input
+	BaseTurnRate = 45.f;
+	BaseLookUpRate = 45.f;
+
 	RunSpeed = 300.f;
 
 	FlySprintSpeed = 1000.f;
@@ -92,6 +96,10 @@ void AFPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("Turn", this, &AFPCharacter::Turn);
 	
 	PlayerInputComponent->BindAxis("LookUp", this, &AFPCharacter::LookUp);
+
+	PlayerInputComponent->BindAxis("TurnRate", this, &AFPCharacter::TurnAtRate);
+
+	PlayerInputComponent->BindAxis("LookUpRate", this, &AFPCharacter::LookUpAtRate);
 
 	PlayerInputComponent->BindAction("Flashlight", IE_Pressed, this, &AFPCharacter::ToggleFlashlight);
 	
@@ -178,6 +186,18 @@ void AFPCharacter::Turn(float Scale)
 void AFPCharacter::LookUp(float Scale)
 {
 	AddControllerPitchInput(Scale);
+
+	PlayerCamera->RelativeRotation.Pitch = GetController()->GetControlRotation().Pitch;
+}
+
+void AFPCharacter::TurnAtRate(float Scale)
+{
+	AddControllerYawInput(Scale * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AFPCharacter::LookUpAtRate(float Scale)
+{
+	AddControllerPitchInput(Scale * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 
 	PlayerCamera->RelativeRotation.Pitch = GetController()->GetControlRotation().Pitch;
 }
