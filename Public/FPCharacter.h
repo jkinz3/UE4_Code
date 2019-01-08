@@ -70,6 +70,8 @@ public:
 
 	void OnFly();
 
+	UFUNCTION(BlueprintCallable)
+		bool bIsMovingForward();
 	void OnDeath();
 	
 	UFUNCTION(BlueprintCallable)
@@ -133,6 +135,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		USpotLightComponent* Flashlight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mesh)
+		USkeletalMeshComponent* WorldMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		USoundBase* DefaultStepSound;
