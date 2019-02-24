@@ -31,10 +31,6 @@ AFPCharacter::AFPCharacter()
 
 	SprintSpeed = 600.f;
 
-	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
-
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-
 	bIsFlashlightOn = false;
 
 	RunStepRate = .6f;
@@ -63,6 +59,11 @@ AFPCharacter::AFPCharacter()
 void AFPCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
+
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
 // Called every frame
