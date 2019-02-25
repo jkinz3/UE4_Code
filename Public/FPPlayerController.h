@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "FPCharacter.h"
 #include "GameFramework/PlayerController.h"
-#include "FPCameraManager.h"
 #include "FPPlayerController.generated.h"
 
 /**
