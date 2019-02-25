@@ -1,12 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "../Public/FPCharacter.h"
-#include "Engine.h"
+#include "Engine/Engine.h"
+#include "Engine/StaticMesh.h"
+#include "DrawDebugHelpers.h"
+#include "Engine/Classes/GameFramework/CharacterMovementComponent.h"
 
+//creating a print definition, because I hate typing this  out every time.
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(1, 1.5f, FColor::Blue, text)
 // Sets default values
 AFPCharacter::AFPCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
@@ -19,9 +24,25 @@ AFPCharacter::AFPCharacter()
 
 	Flashlight->SetupAttachment(PlayerCamera);
 
-	Flashlight->RelativeLocation = FVector(0.f, 0.f,4.f);
+	Flashlight->RelativeLocation = FVector(0.f, 0.f, 4.f);
 
 	Flashlight->SetVisibility(false);
+
+	HeldLocation = CreateDefaultSubobject<USceneComponent>(TEXT("Held Location"));
+	HeldLocation->SetupAttachment(PlayerCamera);
+
+	// Set our turn rates for input
+	BaseTurnRate = 45.f;
+	BaseLookUpRate = 45.f;
+	WorldMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("3rd Person Mesh"));
+
+	WorldMesh->SetupAttachment(RootComponent);
+
+	WorldMesh->RelativeLocation = FVector(0.f, 0.f, -90.f);
+
+	WorldMesh->RelativeRotation = FRotator(0.f, 0.f, -90.f);
+
+	bEnableSprint = false;
 
 	RunSpeed = 300.f;
 
@@ -38,21 +59,18 @@ AFPCharacter::AFPCharacter()
 	SprintStepRate = .3f;
 
 	DefaultLean = 0.f;
-	
-	TimeBetweenSteps = RunStepRate;
-
-	bIsZoomed = false;
 
 	LeanAmount = .001f;
 
 	LeanSpeed = 20.f;
 
-	ZoomSpeed = 20.f;
+	bUseLean = false;
 
-	HoldingComponent = CreateDefaultSubobject<USceneComponent>(TEXT("HoldingComponent"));
-	HoldingComponent->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
+	CurrentHealth = MaxHealth;
 
-	CurrentObject = NULL;
+	bIsHoldingObject = false;
+
+	ThrowForce = 100000.f;
 }
 
 // Called when the game starts or when spawned
@@ -60,10 +78,10 @@ void AFPCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
-
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
+	TimeBetweenSteps = RunStepRate;
+
 }
 
 // Called every frame
@@ -71,140 +89,102 @@ void AFPCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateCameraLean(DeltaTime);
-}
+	if (bIsHoldingObject && HoldingHandle != nullptr)
+	{
+		HoldingHandle->SetTargetLocation(HeldLocation->GetComponentLocation());
+		FRotator NewRotation = FRotator::ZeroRotator;
+		NewRotation.Yaw = GetActorRotation().Yaw;
 
+
+		HeldActor->SetActorRotation(NewRotation);
+	}
+}
 
 // Called to bind functionality to input
 void AFPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
-	PlayerInputComponent->BindAxis("MoveForward", this, &AFPCharacter::MoveForward);
-
-	PlayerInputComponent->BindAxis("MoveRight", this, &AFPCharacter::MoveRight);
-
-	PlayerInputComponent->BindAxis("MoveUp", this, &AFPCharacter::MoveUp);
-
-	PlayerInputComponent->BindAction("Fly", IE_Pressed, this, &AFPCharacter::OnFly);
-
-	PlayerInputComponent->BindAxis("Turn", this, &AFPCharacter::Turn);
-	
-	PlayerInputComponent->BindAxis("LookUp", this, &AFPCharacter::LookUp);
-
-	PlayerInputComponent->BindAction("Flashlight", IE_Pressed, this, &AFPCharacter::ToggleFlashlight);
-	
-	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AFPCharacter::StartSprint);
-	
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AFPCharacter::StopSprint);
-
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPCharacter::StartJump);
-	
-	PlayerInputComponent->BindAction("Quit", IE_Pressed, this, &AFPCharacter::OnQuit);
-
-	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &AFPCharacter::StartZoom);
-	
-	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &AFPCharacter::StopZoom);
-
-	PlayerInputComponent->BindAction("Use", IE_Pressed, this, &AFPCharacter::OnUse);
 }
 
 void AFPCharacter::MoveForward(float Scale)
 {
-	if (Scale == 0)
+	if (Scale == 0.f)
 	{
 		return;
 	}
 	AddMovementInput(GetActorForwardVector(), Scale);
-	
+
 	HandleFootsteps();
 }
 
 void AFPCharacter::MoveRight(float Scale)
 {
-	if (Scale == 0)
+	if (Scale == 0.f)
 	{
-		bIsMovingLeft = false;
-
-		bIsMovingRight = false;
-
 		return;
 	}
-	
 	AddMovementInput(GetActorRightVector(), Scale);
-	
+
 	HandleFootsteps();
 
-	if (Scale == 1)
-	{
-		bIsMovingRight = true;
-		
-		bIsMovingLeft = false;
-	}
-	if (Scale == -1)
-	{
-		bIsMovingLeft = true;
-		
-		bIsMovingRight = false;
-	}
-}
-
-void AFPCharacter::MoveUp(float Scale)
-{
-	if (GetCharacterMovement()->IsFlying())
-	{
-		AddMovementInput(GetActorUpVector(), Scale);
-	}
-}
-
-void AFPCharacter::StartJump()
-{
-	if (GetCharacterMovement()->IsMovingOnGround())
-	{
-		Jump();
-		
-		FHitResult DownHit = HandleFootstepTrace();
-		
-		PlayFootstepSound(DownHit);
-	}
 }
 
 void AFPCharacter::Turn(float Scale)
 {
+	if (Scale == 0.f)
+	{
+		return;
+	}
 	AddControllerYawInput(Scale);
+
 }
 
 void AFPCharacter::LookUp(float Scale)
 {
+	if (Scale == 0.f)
+	{
+		return;
+	}
 	AddControllerPitchInput(Scale);
-
 	PlayerCamera->RelativeRotation.Pitch = GetController()->GetControlRotation().Pitch;
+}
+
+void AFPCharacter::TurnAtRate(float Scale)
+{
+	if (Scale == 0.f)
+	{
+		return;
+	}
+	AddControllerYawInput(Scale* BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AFPCharacter::LookUpAtRate(float Scale)
+{
+
+	if (Scale == 0.f)
+	{
+		return;
+	}
+	AddControllerPitchInput(Scale * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AFPCharacter::OnJump()
+{
+	if (GetCharacterMovement()->IsMovingOnGround())
+	{
+		Jump();
+		FHitResult DownHit = HandleFootstepTrace();
+
+		PlayFootstepSound(DownHit, true);
+	}
 }
 
 void AFPCharacter::Landed(const FHitResult & Hit)
 {
-	PlayFootstepSound(Hit);
-}
+	Super::Landed(Hit);
+	PlayFootstepSound(Hit, false);
 
-void AFPCharacter::StartSprint()
-{
-	GetCharacterMovement()->MaxFlySpeed = FlySprintSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-	
-	TimeBetweenSteps = SprintStepRate;
-	
-	bIsSprinting = true;
-}
 
-void AFPCharacter::StopSprint()
-{
-	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
-	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-	
-	TimeBetweenSteps = RunStepRate;
-	
-	bIsSprinting = false;
 }
 
 void AFPCharacter::ToggleFlashlight()
@@ -212,18 +192,76 @@ void AFPCharacter::ToggleFlashlight()
 	if (bIsFlashlightOn)
 	{
 		Flashlight->SetVisibility(false);
-		
+
 		bIsFlashlightOn = false;
-		
-		UGameplayStatics::SpawnSoundAttached(FlashlightSwitchSound, GetRootComponent());
+
+		if (FlashlightSwitchSound != nullptr)
+		{
+			UGameplayStatics::SpawnSoundAttached(FlashlightSwitchSound, GetRootComponent());
+		}
 	}
 	else
 	{
 		Flashlight->SetVisibility(true);
-	
+
 		bIsFlashlightOn = true;
-	
-		UGameplayStatics::SpawnSoundAttached(FlashlightSwitchSound, GetRootComponent());
+		if (FlashlightSwitchSound != nullptr)
+		{
+			UGameplayStatics::SpawnSoundAttached(FlashlightSwitchSound, GetRootComponent());
+		}
+	}
+}
+
+void AFPCharacter::Use()
+{
+	FHitResult UseHit = ForwardTrace();
+
+	if (UseHit.Actor != NULL && UseHit.Component != NULL)
+	{
+		PickUpObject(UseHit.Actor.Get(), UseHit.Component.Get());
+
+	}
+}
+
+void AFPCharacter::StartSprint()
+{
+	if (IsMovingForward() && IsSprintEnabled())
+	{
+		GetCharacterMovement()->MaxFlySpeed = FlySprintSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+
+		TimeBetweenSteps = SprintStepRate;
+
+		bIsSprinting = true;
+	}
+}
+
+void AFPCharacter::StopSprint()
+{
+	if (IsSprintEnabled())
+	{
+		GetCharacterMovement()->MaxFlySpeed = FlySpeed;
+
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+
+		TimeBetweenSteps = RunStepRate;
+
+		bIsSprinting = false;
+	}
+}
+
+void AFPCharacter::Fire()
+{
+	if (bIsHoldingObject)
+	{
+		HoldingHandle->ReleaseComponent();
+		bIsHoldingObject = false;
+		UPrimitiveComponent* MeshToThrow = Cast<UPrimitiveComponent>(HeldActor->GetRootComponent());
+		if (MeshToThrow != nullptr)
+		{
+			FVector ThrowVector = GetControlRotation().Vector() * ThrowForce;
+			MeshToThrow->AddImpulse(ThrowVector);
+		}
 	}
 }
 
@@ -237,8 +275,8 @@ void AFPCharacter::HandleFootsteps()
 	if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) >= NextStepTime && GetCharacterMovement()->IsMovingOnGround())
 	{
 		FHitResult FootstepHitResult = HandleFootstepTrace();
-	
-		PlayFootstepSound(FootstepHitResult);
+
+		PlayFootstepSound(FootstepHitResult, false);
 
 		float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 
@@ -248,32 +286,86 @@ void AFPCharacter::HandleFootsteps()
 	}
 }
 
-void AFPCharacter::StartZoom()
+bool AFPCharacter::IsSprinting()
 {
-	bIsZoomed = true;
+	return bIsSprinting;
 }
 
-void AFPCharacter::StopZoom()
+bool AFPCharacter::IsSprintEnabled()
 {
-	bIsZoomed = false;
+	return bEnableSprint;
 }
 
-USoundBase* AFPCharacter::GetFootstepSound(EPhysicalSurface Surface)
+bool AFPCharacter::IsMovingForward()
+{
+	FVector PlayerVelocity = GetVelocity();
+	FVector ForwardVector = GetActorForwardVector();
+	float DotProduct = FVector::DotProduct(PlayerVelocity, ForwardVector);
+	if (DotProduct > .7f)
+	{
+		return true;
+	}
+	return false;
+}
+
+FHitResult AFPCharacter::ForwardTrace()
+{
+	FHitResult RV_ForwardHit;
+	static FName NAME_ForwardTrace(TEXT("Forward Trace"));
+	FCollisionQueryParams QueryParams(NAME_ForwardTrace, false, this);
+
+	QueryParams.TraceTag = NAME_ForwardTrace;
+
+	const FVector TraceStart = PlayerCamera->GetComponentLocation();
+	const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 1000.f;
+
+	GetWorld()->LineTraceSingleByChannel(RV_ForwardHit, TraceStart, TraceEnd, GetCapsuleComponent()->GetCollisionObjectType(), QueryParams);
+	return RV_ForwardHit;
+
+}
+
+USoundBase * AFPCharacter::GetFootstepSound(EPhysicalSurface Surface, bool bIsJumping)
 {
 	USoundBase** SoundPtr = nullptr;
-	
-	SoundPtr = FootstepSoundsMap.Find(Surface);
 
+	if (IsSprintEnabled())
+	{
+
+		if (IsSprinting())
+		{
+			SoundPtr = SprintStepsMap.Find(Surface);
+		}
+		else if (!IsSprinting())
+		{
+			SoundPtr = WalkStepsMap.Find(Surface);
+		}
+		if (bIsJumping)
+		{
+			SoundPtr = SprintStepsMap.Find(Surface);
+		}
+		if (!bIsJumping && GetCharacterMovement()->IsFalling())
+		{
+			SoundPtr = LandStepsMap.Find(Surface);
+		}
+	}
+	else
+	{
+		if (!bIsJumping && GetCharacterMovement()->IsFalling())
+		{
+			SoundPtr = LandStepsMap.Find(Surface);
+		}
+		SoundPtr = SprintStepsMap.Find(Surface);
+	}
 	return SoundPtr ? *SoundPtr : nullptr;
 }
 
-void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit)
+void AFPCharacter::PlayFootstepSound(const FHitResult & DownHit, bool bIsJumping)
 {
 	if (DownHit.PhysMaterial != NULL)
 	{
 		EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(DownHit.PhysMaterial.Get());
 
-		USoundBase* NewFootstepSound = GetFootstepSound(SurfaceType);
+		USoundBase* NewFootstepSound = GetFootstepSound(SurfaceType, bIsJumping);
 
 		if (NewFootstepSound)
 		{
@@ -284,7 +376,6 @@ void AFPCharacter::PlayFootstepSound(const FHitResult& DownHit)
 			UGameplayStatics::SpawnSoundAtLocation(this, DefaultStepSound, DownHit.Location);
 		}
 	}
-
 }
 
 FHitResult AFPCharacter::HandleFootstepTrace()
@@ -310,87 +401,33 @@ FHitResult AFPCharacter::HandleFootstepTrace()
 	FHitResult RV_DownHit;
 
 	GetWorld()->LineTraceSingleByChannel(RV_DownHit, LineTraceStart, LineTraceStart + DownDirection, GetCapsuleComponent()->GetCollisionObjectType(), QueryParams);
-	
+
 	return RV_DownHit;
+
 }
 
-void AFPCharacter::UpdateCameraLean(float DeltaTime)
+void AFPCharacter::PickUpObject(AActor * ActorToPickup, UPrimitiveComponent* ActorComponent)
 {
-	if (PlayerCamera)
+	if (!bIsHoldingObject)
 	{
-		if (!bIsMovingLeft && !bIsMovingRight)
-		{
-			TargetLean = 0.0f;
-		}
-		if (bIsMovingRight)
-		{
-			TargetLean = LeanAmount;
-		}
-		if (bIsMovingLeft)
-		{
-			float LeftLeanAmount = LeanAmount * -1.f;
+		UPhysicsHandleComponent* PhysicsHandleComponent = NewObject<UPhysicsHandleComponent>(ActorToPickup);
+		PhysicsHandleComponent->RegisterComponent();
 
-			TargetLean = LeftLeanAmount;
-		}
-		DefaultLean = FMath::FInterpTo(DefaultLean, TargetLean, DeltaTime, LeanSpeed);
-				
-		PlayerCamera->RelativeRotation.Roll = DefaultLean;
-	}
-}
+		HoldingHandle = PhysicsHandleComponent;
 
-void AFPCharacter::OnUse()
-{
-	FHitResult RV_ForwardHit;
-	static FName NAME_ForwardTrace(TEXT("Forward Trace"));
-	FCollisionQueryParams QueryParams(NAME_ForwardTrace, false, this);
+		PhysicsHandleComponent->GrabComponentAtLocation(ActorComponent, TEXT("None"), ActorToPickup->GetActorLocation());
 
-	QueryParams.TraceTag = NAME_ForwardTrace;
+		bIsHoldingObject = true;
 
-	const FVector TraceStart = PlayerCamera->GetComponentLocation();
-
-	const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 256;
-
-	GetWorld()->LineTraceSingleByChannel(RV_ForwardHit, TraceStart, TraceEnd, GetCapsuleComponent()->GetCollisionObjectType(), QueryParams);
-
-	if (RV_ForwardHit.Actor != NULL && RV_ForwardHit.Actor->GetClass()->IsChildOf(AInteractionObject::StaticClass()))
-	{
-		AInteractionObject* HoldingObject = Cast < AInteractionObject> (RV_ForwardHit.GetActor());
-		HoldingObject->PickUp(this);
-	}
-}
-
-void AFPCharacter::OnFly()
-{
-	if (GetCharacterMovement()->IsFlying())
-	{
-		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		HeldActor = ActorToPickup;
 	}
 	else
 	{
-		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+		if (HoldingHandle != nullptr)
+		{
+			HoldingHandle->ReleaseComponent();
+
+			bIsHoldingObject = false;
+		}
 	}
-}
-
-FHitResult AFPCharacter::ForwardTrace()
-{
-	FHitResult RV_ForwardHit;
-
-	static FName NAME_ForwardTrace(TEXT("Forward Trace"));
-
-	FCollisionQueryParams QueryParams(NAME_ForwardTrace, false, this);
-
-	QueryParams.TraceTag = NAME_ForwardTrace;
-
-	const FVector TraceStart = PlayerCamera->GetComponentLocation();
-
-	const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 256;
-
-	GetWorld()->LineTraceSingleByChannel(RV_ForwardHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
-	
-	if (RV_ForwardHit.Actor != NULL)
-	{
-		GEngine->AddOnScreenDebugMessage(1, 0.5f, FColor::Red, "HAI");
-	}
-
-	return RV_ForwardHit;
 }
