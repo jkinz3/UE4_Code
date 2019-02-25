@@ -4,12 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Runtime/Engine/Classes/Components/CapsuleComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Runtime/Engine/Classes/Sound/SoundWave.h"
 #include "Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
 #include "Runtime/Engine/Classes/PhysicalMaterials/PhysicalMaterial.h"
 #include "Runtime/Engine/Classes/Components/SpotLightComponent.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
+#include "GameFramework/Actor.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "FPCharacter.generated.h"
 
 UCLASS()
@@ -25,7 +28,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -33,67 +36,33 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void MoveForward(float Scale);
-
 	void MoveRight(float Scale);
-
-	void MoveUp(float Scale); 
-
-	void StartJump();
-
 	void Turn(float Scale);
-
 	void LookUp(float Scale);
-
 	void TurnAtRate(float Scale);
-
 	void LookUpAtRate(float Scale);
-
-	virtual void Landed(const FHitResult& Hit);
-
 	void StartSprint();
-
 	void StopSprint();
 
-	void ToggleFlashlight();
-
+	void Fire();
 	void OnQuit();
+	void OnJump();
+	virtual void Landed(const FHitResult& Hit) override;
+	void ToggleFlashlight();
+	void Use();
 
-	void HandleFootsteps();
-
-	void StartZoom();
-
-	void StopZoom();
-
-	void UpdateCameraLean(float DeltaTime);
-
-	void OnUse();
-
-	void OnFly();
-
-	UFUNCTION(BlueprintCallable)
-		bool bIsMovingForward();
-	void OnDeath();
-	
-	UFUNCTION(BlueprintCallable)
-		bool IsSprinting();
-
-	UFUNCTION(BlueprintCallable)
-	virtual float TakeDamage(float Damage);
-
-	FHitResult ForwardTrace();
-
-	USoundBase* GetFootstepSound(EPhysicalSurface Surface, bool bIsJumping);
-
-	void PlayFootstepSound(const FHitResult& DownHit, bool bIsJumping);
-
-	FHitResult HandleFootstepTrace();
-
-	uint32 bIsZoomed : 1;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean)
-		float ZoomSpeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+		USceneComponent* HeldLocation;
 
 protected:
+
+	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
+
+	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -106,7 +75,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		float RunSpeed;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay, meta = (EditCondition = "bEnableSprint"))
 		float SprintSpeed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
@@ -115,16 +84,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		float FlySprintSpeed;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+		float ThrowForce;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		float RunStepRate;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps, meta = (ClampMin = ".001", EditCondition = "bEnableSprint"))
 		float SprintStepRate;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
+		bool bEnableSprint;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		TMap < TEnumAsByte<EPhysicalSurface>, USoundBase*> WalkStepsMap;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps, meta = (EditCondition = "bEnableSprint"))
 		TMap < TEnumAsByte<EPhysicalSurface>, USoundBase*> SprintStepsMap;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
@@ -142,10 +117,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		USoundBase* DefaultStepSound;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta=(ClampMin=".001", EditCondition = "bUseLean"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta = (ClampMin = ".001", EditCondition = "bUseLean"))
 		float LeanAmount;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta=(EditCondition = "bUseLean"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Lean, meta = (EditCondition = "bUseLean"))
 		float LeanSpeed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
@@ -163,13 +138,37 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
 		USoundBase* DeathSound;
 
+	UFUNCTION(BlueprintCallable)
+		bool IsMovingForward();
+
+	UFUNCTION(BlueprintCallable)
+		bool IsSprinting();
+
+	UFUNCTION(BlueprintCallable)
+		bool IsSprintEnabled();
+
+	FHitResult ForwardTrace();
+
+	USoundBase* GetFootstepSound(EPhysicalSurface Surface, bool bIsJumping);
+
+	void PlayFootstepSound(const FHitResult& DownHit, bool bIsJumping);
+
+	FHitResult HandleFootstepTrace();
+
+	void PickUpObject(AActor* ActorToPickup, UPrimitiveComponent* ActorComponent);
+
 private:
+
 
 	uint32 bIsMovingRight : 1;
 
 	uint32 bIsMovingLeft : 1;
 
 	uint32 bIsFlashlightOn : 1;
+
+	uint32 bIsHoldingObject : 1;
+
+	UPhysicsHandleComponent* HoldingHandle;
 
 	float TimeBetweenSteps;
 
@@ -183,5 +182,7 @@ private:
 
 	float CurrentHealth;
 
-	bool bIsSprinting : 1;
+	bool bIsSprinting;
+
+
 };

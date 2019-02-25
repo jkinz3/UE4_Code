@@ -26,7 +26,7 @@ void AFPCameraManager::UpdateCamera(float DeltaTime)
 	{
 		float TargetFOV = 90.f;
 
-		DefaultFOV = FMath::FInterpTo(DefaultFOV, TargetFOV, DeltaTime, MyPawn->ZoomSpeed);
+	//	DefaultFOV = FMath::FInterpTo(DefaultFOV, TargetFOV, DeltaTime, MyPawn->ZoomSpeed);
 
 		SetFOV(DefaultFOV);
 	}
