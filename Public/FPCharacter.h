@@ -64,14 +64,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
 
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseTurnRate;
-
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseLookUpRate;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 		float RunSpeed;
 
@@ -138,6 +130,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
 		USoundBase* DeathSound;
 
+	void HandleFootsteps();
+
 	UFUNCTION(BlueprintCallable)
 		bool IsMovingForward();
 
@@ -159,6 +153,7 @@ protected:
 
 private:
 
+	AActor* HeldActor;
 
 	uint32 bIsMovingRight : 1;
 

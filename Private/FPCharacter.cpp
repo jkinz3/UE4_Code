@@ -47,7 +47,7 @@ AFPCharacter::AFPCharacter()
 	RunSpeed = 300.f;
 
 	FlySprintSpeed = 1000.f;
-	
+
 	FlySpeed = 600.f;
 
 	SprintSpeed = 600.f;
@@ -174,6 +174,7 @@ void AFPCharacter::OnJump()
 	{
 		Jump();
 		FHitResult DownHit = HandleFootstepTrace();
+
 		PlayFootstepSound(DownHit, true);
 	}
 }
@@ -274,6 +275,7 @@ void AFPCharacter::HandleFootsteps()
 	if (UGameplayStatics::GetRealTimeSeconds(GetWorld()) >= NextStepTime && GetCharacterMovement()->IsMovingOnGround())
 	{
 		FHitResult FootstepHitResult = HandleFootstepTrace();
+
 		PlayFootstepSound(FootstepHitResult, false);
 
 		float CurrentTime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
@@ -367,7 +369,6 @@ void AFPCharacter::PlayFootstepSound(const FHitResult & DownHit, bool bIsJumping
 
 		if (NewFootstepSound)
 		{
-			GEngine->AddOnScreenDebugMessage(1, .5f, FColor::Blue, NewFootstepSound->GetFullName());
 			UGameplayStatics::SpawnSoundAtLocation(this, NewFootstepSound, DownHit.Location);
 		}
 		else
