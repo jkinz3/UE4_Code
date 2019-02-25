@@ -33,7 +33,7 @@ void AInteractionObject::Tick(float DeltaTime)
 
 	if (bHolding && MyCharacter != nullptr)
 	{
-		SetActorLocationAndRotation(MyCharacter->GetHoldingLocation(), FRotator(0,0,0));
+	//	SetActorLocationAndRotation(MyCharacter->GetHoldingLocation(), FRotator(0,0,0));
 	}
 
 }
