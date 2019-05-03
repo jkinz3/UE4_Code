@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraShake.h"
+#include "Sound/SoundWave.h"
 #include "Runtime/Engine/Classes/Components/CapsuleComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
-#include "Runtime/Engine/Classes/Sound/SoundWave.h"
 #include "Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
 #include "Runtime/Engine/Classes/PhysicalMaterials/PhysicalMaterial.h"
 #include "Runtime/Engine/Classes/Components/SpotLightComponent.h"
@@ -64,20 +65,24 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Movement)
 		float RunSpeed;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay, meta = (EditCondition = "bEnableSprint"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Movement, meta = (EditCondition = "bEnableSprint"))
 		float SprintSpeed;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Movement)
 		float FlySpeed;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Movement)
 		float FlySprintSpeed;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Movement)
 		float ThrowForce;
+
+	/*camera shakes*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Movement)
+		TSubclassOf<UCameraShake> WalkCameraShake;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Footsteps)
 		float RunStepRate;
@@ -146,6 +151,8 @@ protected:
 	USoundBase* GetFootstepSound(EPhysicalSurface Surface, bool bIsJumping);
 
 	void PlayFootstepSound(const FHitResult& DownHit, bool bIsJumping);
+
+	void PlayCameraShake();
 
 	FHitResult HandleFootstepTrace();
 

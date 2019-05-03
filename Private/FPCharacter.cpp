@@ -176,6 +176,7 @@ void AFPCharacter::OnJump()
 		FHitResult DownHit = HandleFootstepTrace();
 
 		PlayFootstepSound(DownHit, true);
+		
 	}
 }
 
@@ -375,6 +376,19 @@ void AFPCharacter::PlayFootstepSound(const FHitResult & DownHit, bool bIsJumping
 		{
 			UGameplayStatics::SpawnSoundAtLocation(this, DefaultStepSound, DownHit.Location);
 		}
+	}
+}
+
+void AFPCharacter::PlayCameraShake()
+{
+	if (WalkCameraShake != nullptr)
+	{
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	
+	if (PlayerController)
+	{
+		PlayerController->ClientPlayCameraShake(WalkCameraShake, 1.f);
+	}
 	}
 }
 
