@@ -2,35 +2,35 @@
 
 #include "../Public/FPPlayerController.h"
 
-void AFPPlayerController::SetupInputComponent()
+void AFirstPersonController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	InputComponent->BindAxis("MoveForward", this, &AFPPlayerController::MoveForward);
-	InputComponent->BindAxis("MoveRight", this, &AFPPlayerController::MoveRight);
-	InputComponent->BindAxis("Turn", this, &AFPPlayerController::Turn);
-	InputComponent->BindAxis("LookUp", this, &AFPPlayerController::LookUp);
-	InputComponent->BindAxis("TurnRate", this, &AFPPlayerController::TurnRate);
-	InputComponent->BindAxis("LookUpRate", this, &AFPPlayerController::LookUpRate);
+	InputComponent->BindAxis("MoveForward", this, &AFirstPersonController::MoveForward);
+	InputComponent->BindAxis("MoveRight", this, &AFirstPersonController::MoveRight);
+	InputComponent->BindAxis("Turn", this, &AFirstPersonController::Turn);
+	InputComponent->BindAxis("LookUp", this, &AFirstPersonController::LookUp);
+	InputComponent->BindAxis("TurnRate", this, &AFirstPersonController::TurnRate);
+	InputComponent->BindAxis("LookUpRate", this, &AFirstPersonController::LookUpRate);
 
-	InputComponent->BindAction("Sprint", IE_Pressed, this, &AFPPlayerController::StartSprint);
-	InputComponent->BindAction("Sprint", IE_Released, this, &AFPPlayerController::StopSprint);
+	InputComponent->BindAction("Sprint", IE_Pressed, this, &AFirstPersonController::StartSprint);
+	InputComponent->BindAction("Sprint", IE_Released, this, &AFirstPersonController::StopSprint);
 
-	InputComponent->BindAction("Fire", IE_Pressed, this, &AFPPlayerController::OnFire);
-	InputComponent->BindAction("Jump", IE_Pressed, this, &AFPPlayerController::OnJump);
-	InputComponent->BindAction("Quit", IE_Pressed, this, &AFPPlayerController::OnQuit);
-	InputComponent->BindAction("Use", IE_Pressed, this, &AFPPlayerController::OnUse);
+	InputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonController::OnFire);
+	InputComponent->BindAction("Jump", IE_Pressed, this, &AFirstPersonController::OnJump);
+	InputComponent->BindAction("Quit", IE_Pressed, this, &AFirstPersonController::OnQuit);
+	InputComponent->BindAction("Use", IE_Pressed, this, &AFirstPersonController::OnUse);
 
-	InputComponent->BindAction("Flashlight", IE_Pressed, this, &AFPPlayerController::ToggleFlashlight);
+	InputComponent->BindAction("Flashlight", IE_Pressed, this, &AFirstPersonController::ToggleFlashlight);
 }
 
-void AFPPlayerController::SetPawn(APawn * InPawn)
+void AFirstPersonController::SetPawn(APawn * InPawn)
 {
 	AController::SetPawn(InPawn);
 	FPCharacter = Cast<AFPCharacter>(InPawn);
 }
 
-void AFPPlayerController::MoveForward(float Scale)
+void AFirstPersonController::MoveForward(float Scale)
 {
 	if (FPCharacter != nullptr)
 	{
@@ -38,7 +38,7 @@ void AFPPlayerController::MoveForward(float Scale)
 	}
 }
 
-void AFPPlayerController::MoveRight(float Scale)
+void AFirstPersonController::MoveRight(float Scale)
 {
 	if (FPCharacter != nullptr)
 	{
@@ -46,7 +46,7 @@ void AFPPlayerController::MoveRight(float Scale)
 	}
 }
 
-void AFPPlayerController::Turn(float Scale)
+void AFirstPersonController::Turn(float Scale)
 {
 	if (FPCharacter != nullptr)
 	{
@@ -54,7 +54,7 @@ void AFPPlayerController::Turn(float Scale)
 	}
 }
 
-void AFPPlayerController::LookUp(float Scale)
+void AFirstPersonController::LookUp(float Scale)
 {
 	if (FPCharacter != nullptr)
 	{
@@ -62,7 +62,7 @@ void AFPPlayerController::LookUp(float Scale)
 	}
 }
 
-void AFPPlayerController::TurnRate(float Scale)
+void AFirstPersonController::TurnRate(float Scale)
 {
 	if (FPCharacter != nullptr)
 	{
@@ -70,7 +70,7 @@ void AFPPlayerController::TurnRate(float Scale)
 	}
 }
 
-void AFPPlayerController::LookUpRate(float Scale)
+void AFirstPersonController::LookUpRate(float Scale)
 {
 	if (FPCharacter != nullptr)
 	{
@@ -78,7 +78,7 @@ void AFPPlayerController::LookUpRate(float Scale)
 	}
 }
 
-void AFPPlayerController::StartSprint()
+void AFirstPersonController::StartSprint()
 {
 	if (FPCharacter != nullptr)
 	{
@@ -86,7 +86,7 @@ void AFPPlayerController::StartSprint()
 	}
 }
 
-void AFPPlayerController::StopSprint()
+void AFirstPersonController::StopSprint()
 {
 	if (FPCharacter != nullptr)
 	{
@@ -94,7 +94,7 @@ void AFPPlayerController::StopSprint()
 	}
 }
 
-void AFPPlayerController::OnQuit()
+void AFirstPersonController::OnQuit()
 {
 	if (FPCharacter != nullptr)
 	{
@@ -102,7 +102,7 @@ void AFPPlayerController::OnQuit()
 	}
 }
 
-void AFPPlayerController::OnUse()
+void AFirstPersonController::OnUse()
 {
 	if (FPCharacter != nullptr)
 	{
@@ -110,7 +110,7 @@ void AFPPlayerController::OnUse()
 	}
 }
 
-void AFPPlayerController::OnFire()
+void AFirstPersonController::OnFire()
 {
 	if (FPCharacter != nullptr)
 	{
@@ -118,7 +118,7 @@ void AFPPlayerController::OnFire()
 	}
 }
 
-void AFPPlayerController::OnJump()
+void AFirstPersonController::OnJump()
 {
 	if (FPCharacter != nullptr)
 	{
@@ -126,7 +126,7 @@ void AFPPlayerController::OnJump()
 	}
 }
 
-void AFPPlayerController::ToggleFlashlight()
+void AFirstPersonController::ToggleFlashlight()
 {
 	if (FPCharacter != nullptr)
 	{

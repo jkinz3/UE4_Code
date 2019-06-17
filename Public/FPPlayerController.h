@@ -11,7 +11,7 @@
  *
  */
 UCLASS()
-class ENVIRONMENTS_API AFPPlayerController : public APlayerController
+class ENVIRONMENTS_API AFirstPersonController : public APlayerController
 {
 	GENERATED_BODY()
 
